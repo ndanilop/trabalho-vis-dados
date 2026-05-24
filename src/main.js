@@ -34,6 +34,7 @@ const svg = chartContainer
 const detailsTitle = d3.select("#details-title");
 const detailsSubtitle = d3.select("#details-subtitle");
 const detailsList = d3.select("#details-list");
+const yearFilter = document.querySelector("#year-filter");
 
 const CATEGORY_KEYS = ["Revival", "New"];
 const CATEGORY_LABELS = {
@@ -44,6 +45,8 @@ const CATEGORY_COLORS = {
     Revival: "#1b9e77",
     New: "#d95f02",
 };
+const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const MONTH_LABELS_FULL = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
 async function inicializarESQL() {
     console.log("Inicializando DuckDB...");
@@ -84,7 +87,8 @@ async function inicializarESQL() {
             role,
             production_type,
             performances,
-            show_category as category
+            show_category as category,
+            opening_date_parsed
         FROM clean_data
         ORDER BY year, show_name;
     `);
@@ -100,39 +104,96 @@ async function inicializarESQL() {
             production_type: d.production_type,
             performances: d.performances ? Number(d.performances) : null,
             category: d.category,
+            opening_date: d.opening_date_parsed ? new Date(d.opening_date_parsed) : null,
         };
     });
 
+    configurarFiltroAno(details);
     desenharBarrasEmpilhadas(details);
 
     await conn.close();
     await db.terminate();
 }
 
-function desenharBarrasEmpilhadas(details) {
-    const dataByYear = d3
-        .rollups(
-            details,
-            values => {
-                const row = { year: values[0].year, Revival: 0, New: 0, total: 0 };
-                const grouped = d3.group(values, d => d.category);
-                CATEGORY_KEYS.forEach(key => {
-                    const set = new Set((grouped.get(key) || []).map(item => item.show_name));
-                    row[key] = set.size;
-                    row.total += row[key];
-                });
-                return row;
-            },
-            d => d.year
-        )
-        .map(([, value]) => value)
-        .sort((a, b) => d3.ascending(a.year, b.year));
+function configurarFiltroAno(details) {
+    if (!yearFilter) return;
 
-    const years = dataByYear.map(d => d.year);
-    const maxTotal = d3.max(dataByYear, d => d.total) || 1;
+    const years = Array.from(new Set(details.map(item => item.year)))
+        .filter(year => Number.isFinite(year))
+        .sort((a, b) => a - b);
+
+    yearFilter.innerHTML = "<option value=\"all\">Todos os anos</option>";
+    years.forEach(year => {
+        const option = document.createElement("option");
+        option.value = String(year);
+        option.textContent = String(year);
+        yearFilter.appendChild(option);
+    });
+
+    yearFilter.addEventListener("change", () => {
+        desenharBarrasEmpilhadas(details);
+    });
+}
+
+function desenharBarrasEmpilhadas(details) {
+    const selectedYear = yearFilter && yearFilter.value !== "all"
+        ? Number(yearFilter.value)
+        : null;
+    const isMonthView = Number.isFinite(selectedYear);
+    svg.selectAll("*").remove();
+
+    const baseDetails = isMonthView
+        ? details.filter(item => item.year === selectedYear)
+        : details;
+
+    if (!baseDetails.length) {
+        detailsTitle.text("Sem dados para o ano selecionado");
+        detailsSubtitle.text("Escolha outro ano ou limpe o filtro.");
+        detailsList.html("");
+        return;
+    }
+
+    detailsTitle.text(isMonthView ? "Passe o mouse em um mês" : "Passe o mouse em um ano para ver detalhes");
+    detailsSubtitle.text("Clique para fixar a seleção.");
+    detailsList.html("");
+
+    const dataByTime = isMonthView
+        ? MONTH_LABELS.map((label, index) => {
+            const monthItems = baseDetails.filter(item => {
+                if (!item.opening_date || Number.isNaN(item.opening_date.getTime())) return false;
+                return item.opening_date.getMonth() === index;
+            });
+            const grouped = d3.group(monthItems, d => d.category);
+            const row = { key: index, label, Revival: 0, New: 0, total: 0 };
+            CATEGORY_KEYS.forEach(key => {
+                const set = new Set((grouped.get(key) || []).map(item => item.show_name));
+                row[key] = set.size;
+                row.total += row[key];
+            });
+            return row;
+        })
+        : d3
+            .rollups(
+                details,
+                values => {
+                    const row = { key: values[0].year, label: values[0].year, Revival: 0, New: 0, total: 0 };
+                    const grouped = d3.group(values, d => d.category);
+                    CATEGORY_KEYS.forEach(key => {
+                        const set = new Set((grouped.get(key) || []).map(item => item.show_name));
+                        row[key] = set.size;
+                        row.total += row[key];
+                    });
+                    return row;
+                },
+                d => d.year
+            )
+            .map(([, value]) => value)
+            .sort((a, b) => d3.ascending(a.key, b.key));
+
+    const maxTotal = d3.max(dataByTime, d => d.total) || 1;
 
     const x = d3.scaleBand()
-        .domain(years)
+        .domain(dataByTime.map(d => d.key))
         .range([0, width])
         .padding(0.12);
 
@@ -141,10 +202,12 @@ function desenharBarrasEmpilhadas(details) {
         .nice()
         .range([height, 0]);
 
-    const tickYears = years.length > 15 ? years.filter(year => year % 5 === 0) : years;
+    const yTickValues = isMonthView
+        ? [0, 1, 2, 3]
+        : y.ticks(8);
 
     svg.selectAll("line.grid-line")
-        .data(y.ticks(8))
+        .data(yTickValues)
         .enter()
         .append("line")
         .attr("class", "grid-line")
@@ -153,23 +216,33 @@ function desenharBarrasEmpilhadas(details) {
         .attr("y1", d => y(d))
         .attr("y2", d => y(d));
 
+    const xAxis = isMonthView
+        ? d3.axisBottom(x).tickFormat(key => MONTH_LABELS[key])
+        : d3.axisBottom(x)
+            .tickValues(dataByTime.length > 15 ? dataByTime.filter(d => d.key % 5 === 0).map(d => d.key) : dataByTime.map(d => d.key))
+            .tickFormat(d3.format("d"));
+
     svg.append("g")
         .attr("class", "axis axis-x")
         .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x).tickValues(tickYears).tickFormat(d3.format("d")));
+        .call(xAxis);
+
+    const yAxis = isMonthView
+        ? d3.axisLeft(y).tickValues(yTickValues).tickFormat(d3.format("d"))
+        : d3.axisLeft(y).ticks(8);
 
     svg.append("g")
         .attr("class", "axis axis-y")
-        .call(d3.axisLeft(y).ticks(8));
+        .call(yAxis);
 
     svg.append("text")
         .attr("class", "axis-label")
         .attr("x", 0)
         .attr("y", -10)
-        .text("Total de espetaculos por ano");
+        .text(isMonthView ? `Total de espetáculos por mês em ${selectedYear}` : "Total de espetáculos por ano");
 
     const stack = d3.stack().keys(CATEGORY_KEYS);
-    const series = stack(dataByYear);
+    const series = stack(dataByTime);
 
     const layers = svg.selectAll("g.bar-layer")
         .data(series)
@@ -181,43 +254,49 @@ function desenharBarrasEmpilhadas(details) {
     layers.selectAll("rect")
         .data(d => d.map(item => ({
             key: d.key,
-            year: item.data.year,
+            bucketKey: item.data.key,
             y0: item[0],
             y1: item[1],
         })))
         .enter()
         .append("rect")
-        .attr("x", d => x(d.year))
+        .attr("x", d => x(d.bucketKey))
         .attr("y", d => y(d.y1))
         .attr("height", d => y(d.y0) - y(d.y1))
         .attr("width", x.bandwidth());
 
-    const detailsByYear = d3.group(details, d => d.year);
-    let pinnedYear = null;
+    let pinnedKey = null;
+    const detailsByKey = isMonthView
+        ? d3.group(baseDetails, d => (d.opening_date ? d.opening_date.getMonth() : -1))
+        : d3.group(details, d => d.year);
 
-    function updateHighlight(year) {
+    function updateHighlight(key) {
         svg.selectAll("rect.year-overlay")
-            .classed("is-active", d => year !== null && d.year === year);
+            .classed("is-active", d => key !== null && d.key === key);
 
         svg.selectAll("g.bar-layer rect")
-            .classed("is-dimmed", d => year !== null && d.year !== year);
+            .classed("is-dimmed", d => key !== null && d.bucketKey !== key);
     }
 
     function clearDetails() {
-        detailsTitle.text("Passe o rato num ano");
-        detailsSubtitle.text("Clique para fixar a selecao.");
+        detailsTitle.text(isMonthView ? "Passe o mouse em um mês" : "Passe o mouse em um ano para ver detalhes");
+        detailsSubtitle.text("Clique para fixar a seleção.");
         detailsList.html("");
         updateHighlight(null);
     }
 
-    function updateDetails(year, isPinned) {
-        const items = detailsByYear.get(year) || [];
+    function updateDetails(key, isPinned) {
+        const items = detailsByKey.get(key) || [];
 
-        detailsTitle.text(`Ano ${year}`);
-        detailsSubtitle.text(isPinned ? "Selecionado. Clique novamente para limpar." : "Clique para fixar a selecao.");
+        if (isMonthView) {
+            detailsTitle.text(`Mês de ${MONTH_LABELS_FULL[key]} de ${selectedYear}`);
+        } else {
+            detailsTitle.text(`Ano ${key}`);
+        }
+        detailsSubtitle.text(isPinned ? "Selecionado. Clique novamente para limpar." : "Clique para fixar a seleção.");
 
         if (!items.length) {
-            detailsList.html("<p class=\"details-empty\">Sem registros para este ano.</p>");
+            detailsList.html(`<p class=\"details-empty\">Sem registros para este ${isMonthView ? "mês" : "ano"}.</p>`);
             return;
         }
 
@@ -250,7 +329,7 @@ function desenharBarrasEmpilhadas(details) {
             if (Number.isFinite(d.performances)) {
                 container.append("div")
                     .attr("class", "detail-meta")
-                    .text(`Apresentacoes: ${d.performances}`);
+                    .text(`Apresentações: ${d.performances}`);
             }
             container.append("span")
                 .attr("class", `detail-tag ${d.category === 'Revival' ? 'revival' : 'new'}`)
@@ -265,32 +344,32 @@ function desenharBarrasEmpilhadas(details) {
     }
 
     svg.selectAll("rect.year-overlay")
-        .data(dataByYear)
+        .data(dataByTime)
         .enter()
         .append("rect")
         .attr("class", "year-overlay")
-        .attr("x", d => x(d.year))
+        .attr("x", d => x(d.key))
         .attr("y", 0)
         .attr("width", x.bandwidth())
         .attr("height", height)
         .on("mouseover", (_, d) => {
-            if (pinnedYear === null) {
-                updateDetails(d.year, false);
-                updateHighlight(d.year);
+            if (pinnedKey === null) {
+                updateDetails(d.key, false);
+                updateHighlight(d.key);
             }
         })
         .on("mouseout", () => {
-            if (pinnedYear === null) {
+            if (pinnedKey === null) {
                 clearDetails();
             }
         })
         .on("click", (_, d) => {
-            pinnedYear = pinnedYear === d.year ? null : d.year;
-            if (pinnedYear === null) {
+            pinnedKey = pinnedKey === d.key ? null : d.key;
+            if (pinnedKey === null) {
                 clearDetails();
             } else {
-                updateDetails(pinnedYear, true);
-                updateHighlight(pinnedYear);
+                updateDetails(pinnedKey, true);
+                updateHighlight(pinnedKey);
             }
         });
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linha do tempo Maestra Broadway</title>
+    
+    
+      <script type="module" crossorigin src="/assets/index-qvP5T03p.js"></script>
+      <link rel="stylesheet" crossorigin href="/assets/index-Bhjx3LQJ.css">
+    </head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <p>Uma exploração das mulheres e pessoas não-binárias que lideraram equipes musicais e orquestras da Broadway como maestras e diretoras musicais.<br>
+            Compilado por Sariva Goetz em 2025 e em atualização contínua.</p>
+            <p>O gráfico agrega os espetáculos por ano para revelar tendências e reduzir a sobreposição dos pontos.</p>
+            <p>Passe o mouse por uma barra ou clique para fixar e ver os detalhes no painel lateral.</p>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="dot revival-dot"></span> Reprise
+                </div>
+                <div class="legend-item">
+                    <span class="dot new-dot"></span> Musical original
+                </div>
+            </div>
+
+            <div class="controls">
+                <label for="year-filter">Filtrar por ano</label>
+                <select id="year-filter">
+                    <option value="all">Todos os anos</option>
+                </select>
+            </div>
+
+            <div class="details-panel">
+                <h3 id="details-title">Passe o mouse em um ano para ver detalhes</h3>
+                <p id="details-subtitle">Clique para fixar a seleção.</p>
+                <div id="details-list"></div>
+            </div>
+        </aside>
+
+        <main class="chart-wrapper">
+            <div id="chart"></div>
+        </main>
+    </div>
+
+</body>
+</html>
