@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Broadway Maestra Timeline</title>
+    <title>Linha do tempo Maestra Broadway</title>
     
     <link rel="stylesheet" href="/src/style.css">
     
@@ -11,31 +11,24 @@
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
-            <p>An exploration of the women and nonbinary conductors and music directors who have led Broadway music teams and orchestras.<br>
-            Compiled by Sariva Goetz in 2025 and ongoing.</p>
-            <p>To navigate the timeline, you may either apply the filters below to search for a specific person and show, or use the scroller to browse and zoom in and out on the page.</p>
-            <p>Click on the name of a show to bring up a pop-up displaying detailed information about all the Maestra conductors and music directors involved in that production.</p>
-            <p>Musical revivals are highlighted in <span class="highlight-pink">pink</span>, while new musicals are marked in <span class="highlight-blue">light blue</span>.</p>
-            
-            <div class="controls">
-                <label for="search">SEARCH FOR CONDUCTOR OR SHOW</label>
-                <input type="text" id="search" placeholder="🔍">
-                
-                <label for="filter-type">FILTER BY SHOW TYPE</label>
-                <select id="filter-type">
-                    <option value="all">New Musical / Revival</option>
-                    <option value="Musical Revival">Musical Revivals</option>
-                    <option value="New Musical">New Musicals</option>
-                </select>
+            <p>Uma exploracao das mulheres e pessoas nao-binarias que lideraram equipes musicais e orquestras da Broadway como maestras e diretoras musicais.<br>
+            Compilado por Sariva Goetz em 2025 e em atualizacao continua.</p>
+            <p>O grafico agrega os espetaculos por ano para revelar tendencias e reduzir a sobreposicao dos pontos.</p>
+            <p>Passe o rato por uma barra ou clique para fixar e ver os detalhes no painel lateral.</p>
 
-                <div class="legend">
-                    <div class="legend-item">
-                        <span class="dot pink-dot"></span> Musical Revivals
-                    </div>
-                    <div class="legend-item">
-                        <span class="dot blue-dot"></span> New Musicals
-                    </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="dot revival-dot"></span> Reprise
                 </div>
+                <div class="legend-item">
+                    <span class="dot new-dot"></span> Musical original
+                </div>
+            </div>
+
+            <div class="details-panel">
+                <h3 id="details-title">Passe o mouse em um ano para ver detalhes</h3>
+                <p id="details-subtitle">Clique para fixar a selecao.</p>
+                <div id="details-list"></div>
             </div>
         </aside>
 
@@ -43,8 +36,6 @@
             <div id="chart"></div>
         </main>
     </div>
-
-    <div id="tooltip" class="tooltip"></div>
 
     <script type="module" src="/src/main.js"></script>
 </body>
