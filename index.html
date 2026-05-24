@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadway Maestra Timeline</title>
+    
+    <link rel="stylesheet" href="/src/style.css">
+    
+    </head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <p>An exploration of the women and nonbinary conductors and music directors who have led Broadway music teams and orchestras.<br>
+            Compiled by Sariva Goetz in 2025 and ongoing.</p>
+            <p>To navigate the timeline, you may either apply the filters below to search for a specific person and show, or use the scroller to browse and zoom in and out on the page.</p>
+            <p>Click on the name of a show to bring up a pop-up displaying detailed information about all the Maestra conductors and music directors involved in that production.</p>
+            <p>Musical revivals are highlighted in <span class="highlight-pink">pink</span>, while new musicals are marked in <span class="highlight-blue">light blue</span>.</p>
+            
+            <div class="controls">
+                <label for="search">SEARCH FOR CONDUCTOR OR SHOW</label>
+                <input type="text" id="search" placeholder="🔍">
+                
+                <label for="filter-type">FILTER BY SHOW TYPE</label>
+                <select id="filter-type">
+                    <option value="all">New Musical / Revival</option>
+                    <option value="Musical Revival">Musical Revivals</option>
+                    <option value="New Musical">New Musicals</option>
+                </select>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="dot pink-dot"></span> Musical Revivals
+                    </div>
+                    <div class="legend-item">
+                        <span class="dot blue-dot"></span> New Musicals
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="chart-wrapper">
+            <div id="chart"></div>
+        </main>
+    </div>
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
