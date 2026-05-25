@@ -1,20 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+/* Importando Lora para títulos (Editorial/Clássico) e mantendo Space Grotesk para dados/controles */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg-color: #f5f4f1;
-    --text-color: #222;
-    --revival-color: #1b9e77;
-    --new-color: #d95f02;
-    --grid-color: #e3e0d9;
-    --font-family: 'Space Grotesk', sans-serif;
+    /* 1. Base de Telas (Canvas Editorial Premium) */
+    --bg-color: #fbfaf7;         /* Um bege sutilmente mais limpo, imitando papel de alta gramatura / arquivos */
+    --text-color: #161616;       /* Preto tipográfico profundo para leitura confortável */
+    --text-muted: #625f5a;       /* Cinza quente para metadados e textos secundários */
+    
+    /* 2. Cores Semânticas (Contexto de Teatro e Histórico) */
+    --revival-color: #1f4068;    /* Azul Noturno de Arquivo: evoca tradição, história e os clássicos reencenados */
+    --new-color: #c93b2b;        /* Vermelho Veludo / Carmim: evoca a cortina do teatro, energia e estreias inéditas */
+    --accent-gold: #b38f4f;      /* Dourado Marquise: inspirado nas luzes da Broadway, ótimo para feedbacks táteis */
+    
+    /* 3. Elementos de Estrutura */
+    --card-bg: #ffffff;
+    --border-color: #e6e3dc;     /* Linhas integradas aos tons quentes do papel */
+    --grid-color: rgba(214, 209, 198, 0.4); /* Linhas de grade do gráfico extremamente elegantes */
+    
+    /* Fontes */
+    --font-sans: 'Space Grotesk', sans-serif;
+    --font-serif: 'Lora', Georgia, serif;
 }
 
 body {
     margin: 0;
     padding: 0;
-    font-family: var(--font-family);
+    font-family: var(--font-sans);
     background-color: var(--bg-color);
     color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
 }
 
 .dashboard-container {
@@ -24,150 +38,222 @@ body {
     overflow: hidden;
 }
 
-/* Sidebar styling */
+/* Sidebar styling com Scrollbar Customizada Editorial */
 .sidebar {
-    width: 320px;
-    padding: 20px;
+    width: clamp(340px, 25vw, 420px); 
+    flex-shrink: 0; 
+    padding: 32px 24px; /* Mais respiro no topo */
     background-color: var(--bg-color);
-    border-right: 1px solid #ddd;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    border-right: 1px solid var(--border-color);
     font-size: 14px;
-    line-height: 1.4;
+    line-height: 1.6;
     overflow-y: auto;
     z-index: 10;
+    box-sizing: border-box;
 }
 
+/* Scrollbar sutil para não quebrar a estética limpa */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
 
 .legend {
-    margin-top: 18px;
-    padding-top: 10px;
-    border-top: 1px solid #e0ddd6;
-}
-
-.controls { margin-top: 30px; }
-.controls label {
-    display: block;
-    font-size: 11px;
-    font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-}
-
-.controls input, .controls select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.1px;
 }
 
 .dot {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
     border-radius: 50%;
     display: inline-block;
-    margin-right: 8px;
-    border: 1px solid #666;
+    margin-right: 12px;
 }
 .revival-dot { background-color: var(--revival-color); }
 .new-dot { background-color: var(--new-color); }
 
-.details-panel {
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e0ddd6;
+.controls { margin-top: 36px; }
+.controls label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px; /* Melhor legibilidade em caixas altas */
+    color: var(--text-muted);
 }
 
+.controls input, .controls select {
+    width: 100%;
+    padding: 11px 14px; 
+    font-family: var(--font-sans);
+    font-size: 13px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: var(--text-color);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Feedback de foco usando o Dourado Marquise de forma elegante */
+.controls input:focus, .controls select:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px rgba(179, 143, 79, 0.12);
+}
+
+.details-panel {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Título em Lora (Serif) para dar o peso de uma crítica teatral ou cartaz */
 #details-title {
-    margin: 0 0 6px 0;
-    font-size: 16px;
+    margin: 0 0 8px 0;
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-color);
 }
 
 #details-subtitle {
-    margin: 0 0 14px 0;
+    margin: 0 0 20px 0;
     font-size: 12px;
-    color: #666;
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
 #details-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
+/* Transformando os itens em pequenos fragmentos de "programas de teatro" */
 .detail-item {
-    padding: 10px 12px;
-    background: #ffffff;
-    border: 1px solid #ece9e2;
+    padding: 20px; 
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(22, 22, 22, 0.015); 
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.detail-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 22, 22, 0.04);
 }
 
 .detail-show {
+    font-family: var(--font-serif); /* Título do show em Serif */
     font-weight: 700;
+    font-size: 16px;
+    line-height: 1.3;
     margin-bottom: 6px;
 }
 
 .detail-meta {
-    margin-top: 4px;
+    margin-top: 8px;
     font-size: 11px;
     font-weight: 600;
-    color: #666;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
 }
 
 .detail-tag {
     display: inline-block;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
-    padding: 2px 6px;
-    border-radius: 999px;
-    margin-left: 6px;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 4px; 
+    margin-left: 8px;
+    vertical-align: middle;
 }
 
-.detail-tag.revival { background: rgba(27, 158, 119, 0.15); color: var(--revival-color); }
-.detail-tag.new { background: rgba(217, 95, 2, 0.15); color: var(--new-color); }
+.detail-tag.revival { background: rgba(31, 64, 104, 0.08); color: var(--revival-color); }
+.detail-tag.new { background: rgba(201, 59, 43, 0.08); color: var(--new-color); }
 
+/* Lista de elenco/equipe técnica limpa e bem espaçada */
 .detail-people {
-    margin: 0;
+    margin: 14px 0 0 0; 
     padding-left: 16px;
-    font-size: 12px;
-    color: #444;
+    font-size: 13px; 
+    color: #2a2a2a;
+    line-height: 1.6; 
+}
+
+.detail-people li {
+    margin-bottom: 6px; 
 }
 
 .details-empty {
-    font-size: 12px;
-    color: #666;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--font-serif);
+    font-style: italic;
 }
 
 /* Chart Area */
 .chart-wrapper {
     flex-grow: 1;
     position: relative;
-    background-color: #ffffff;
+    background-color: #ffffff; /* Fundo do gráfico em branco puro para destacar as barras */
     overflow: hidden;
 }
 
-/* Tooltip styling */
-/* D3 SVG Elements */
-.axis-label { font-size: 12px; font-weight: bold; font-family: var(--font-family); }
-.domain { opacity: 0; /* Oculta a linha principal do eixo Y no D3 */ }
-.grid-line { stroke: var(--grid-color); stroke-width: 1px; }
-
-.bar-layer rect {
-    transition: opacity 0.2s ease;
+/* D3 SVG Elements - Visual de Impresso Técnico */
+.axis-label { 
+    font-size: 11px; 
+    font-weight: 700; 
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    fill: var(--text-muted); 
+    font-family: var(--font-sans); 
 }
 
+.domain { 
+    stroke: var(--border-color); 
+    stroke-width: 1px;
+}
+
+.grid-line { 
+    stroke: var(--grid-color); 
+    stroke-width: 1px; 
+}
+
+.bar-layer rect {
+    transition: opacity 0.25s ease, fill 0.2s ease;
+}
+
+/* Efeito Focus+Context agressivo e limpo */
 .bar-layer rect.is-dimmed {
-    opacity: 0.45;
+    opacity: 0.12; /* Reduzido levemente para dar ainda mais contraste ao elemento ativo */
 }
 
 .year-overlay {
@@ -175,6 +261,17 @@ body {
     cursor: pointer;
 }
 
+/* Substituído o vermelho sutil pelo tom âmbar/ouro para simular a seleção de uma coluna iluminada */
 .year-overlay.is-active {
-    fill: rgba(0, 0, 0, 0.05);
+    fill: rgba(179, 143, 79, 0.04); 
+}
+
+.timeline-node circle {
+    transition: r 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke-width 0.2s ease;
+}
+
+.drop-line {
+    transition: stroke 0.2s ease, stroke-width 0.2s ease;
+    stroke: var(--border-color);
+    stroke-dasharray: 2 2; /* Linha tracejada fina para parecer guias de diagramas impressos */
 }
