@@ -1,47 +1,63 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linha do tempo Maestra Broadway</title>
-    
+    <title>Maestra Broadway Timeline</title>
     <link rel="stylesheet" href="/src/style.css">
-    
-    </head>
+</head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
-            <p>Uma exploração das mulheres e pessoas não-binárias que lideraram equipes musicais e orquestras da Broadway como maestras e diretoras musicais.<br>
-            Compilado por Sariva Goetz em 2025 e em atualização contínua.</p>
-            <p>O gráfico agrega os espetáculos por ano para revelar tendências e reduzir a sobreposição dos pontos.</p>
-            <p>Passe o mouse por uma barra ou clique para fixar e ver os detalhes no painel lateral.</p>
+        
+        <header class="main-header">
+            <div class="header-branding">
+                <h1>Maestra Broadway Timeline</h1>
+                <p class="description">
+                    An exploration of the women and nonbinary conductors and music directors who have led Broadway music teams and orchestras. 
+                    <span>Compiled by Sariva Goetz in 2025 and ongoing.</span>
+                </p>
+                <p class="instructions">
+                    To navigate the timeline, you may either apply the filters below or use the chart to browse. Click on the name of a show to pin detailed information.
+                </p>
+            </div>
+        </header>
 
-            <div class="legend">
-                <div class="legend-item">
-                    <span class="dot revival-dot"></span> Reprise
+        <div class="main-content">
+            
+            <main class="chart-wrapper" aria-label="Timeline Chart">
+                
+                <div class="chart-toolbar">
+                    <div class="controls">
+                        <label for="year-filter">Filter by year</label>
+                        <select id="year-filter">
+                            <option value="all">All years</option>
+                        </select>
+                    </div>
+
+                    <div class="legend" aria-label="Chart Legend">
+                        <div class="legend-item">
+                            <span class="dot revival-dot"></span> Revival
+                        </div>
+                        <div class="legend-item">
+                            <span class="dot new-dot"></span> New Musical
+                        </div>
+                    </div>
                 </div>
-                <div class="legend-item">
-                    <span class="dot new-dot"></span> Musical original
+
+                <div id="chart"></div>
+            </main>
+
+            <aside class="sidebar" aria-live="polite">
+                <div class="details-panel">
+                    <h2 id="details-title">Hover over a year to see details</h2>
+                    <p id="details-subtitle">Click on a point to pin the selection.</p>
+                    <div id="details-list">
+                        <p class="details-empty">No show currently selected.</p>
+                    </div>
                 </div>
-            </div>
+            </aside>
 
-            <div class="controls">
-                <label for="year-filter">Filtrar por ano</label>
-                <select id="year-filter">
-                    <option value="all">Todos os anos</option>
-                </select>
-            </div>
-
-            <div class="details-panel">
-                <h3 id="details-title">Passe o mouse em um ano para ver detalhes</h3>
-                <p id="details-subtitle">Clique para fixar a seleção.</p>
-                <div id="details-list"></div>
-            </div>
-        </aside>
-
-        <main class="chart-wrapper">
-            <div id="chart"></div>
-        </main>
+        </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>
