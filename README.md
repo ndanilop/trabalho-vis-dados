@@ -11,7 +11,7 @@
 npm install
 ```
 
-## Rodar o projeto
+## rodar o projeto
 
 ```bash
 npm run dev

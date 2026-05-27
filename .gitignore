@@ -1,4 +1,4 @@
 node_modules/
-dist/assets
+dist/
 .vite/
 dist/index.html
