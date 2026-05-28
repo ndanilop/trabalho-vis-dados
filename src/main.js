@@ -4,6 +4,36 @@ import * as duckdb from '@duckdb/duckdb-wasm';
 import duckdb_wasm from '@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url';
 import duckdb_wasm_eh from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url';
 
+// Controle de modo de visualizacao via query string para recalcular o layout.
+const viewModeSelect = document.querySelector("#view-mode");
+const viewParam = new URLSearchParams(window.location.search).get("view");
+const isSoloView = viewParam === "solo";
+
+if (isSoloView) {
+    // Esconde o painel de referencia e deixa o grafico ocupar toda a largura.
+    document.body.classList.add("is-reference-hidden");
+}
+
+if (viewModeSelect) {
+    // Sincroniza o select com a URL atual.
+    viewModeSelect.value = isSoloView ? "solo" : "split";
+    viewModeSelect.addEventListener("change", () => {
+        const mode = viewModeSelect.value;
+        const params = new URLSearchParams(window.location.search);
+
+        // Atualiza a query para que o tamanho do grafico seja recalculado ao recarregar.
+        if (mode === "solo") {
+            params.set("view", "solo");
+        } else {
+            params.delete("view");
+        }
+
+        const query = params.toString();
+        const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
+        window.location.assign(nextUrl);
+    });
+}
+
 // ----------------------------------------------------
 // CONFIGURAÇÃO DO DUCKDB (WASM)
 // ----------------------------------------------------
@@ -41,11 +71,21 @@ const svg = chartContainer
 const detailsTitle = d3.select("#details-title");
 const detailsSubtitle = d3.select("#details-subtitle");
 const detailsList = d3.select("#details-list");
+// Usa os textos iniciais do HTML como padrao para evitar troca depois do load.
+const DEFAULT_DETAILS_TITLE = detailsTitle.text();
+const DEFAULT_DETAILS_SUBTITLE = detailsSubtitle.text();
 
 // Definição de chaves e paleta de cores para consistência visual.
 const CATEGORY_KEYS = ["Revival", "New"];
 const CATEGORY_LABELS = { Revival: "Revival", New: "New Musical" };
-const CATEGORY_COLORS = { Revival: "#D81B60", New: "#0288D1" };
+// Usa somente as cores do CSS para manter legenda e grafico sincronizados.
+const rootStyles = getComputedStyle(document.documentElement);
+const revivalColor = rootStyles.getPropertyValue("--revival-color").trim();
+const newColor = rootStyles.getPropertyValue("--new-color").trim();
+const CATEGORY_COLORS = {
+    Revival: revivalColor,
+    New: newColor
+};
 
 let dadosOriginais = [];
 
@@ -101,10 +141,6 @@ async function inicializarESQL() {
         };
     });
 
-    // Atualiza a legenda visual com as cores correspondentes.
-    d3.select(".revival-dot").style("background-color", CATEGORY_COLORS.Revival);
-    d3.select(".new-dot").style("background-color", CATEGORY_COLORS.New);
-
     preencherDatalists(dadosOriginais);
     configurarFiltroAno(dadosOriginais);
     configurarEventosFiltros();
@@ -134,7 +170,14 @@ function configurarFiltroAno(details) {
         .filter(year => Number.isFinite(year))
         .sort((a, b) => a - b);
 
-    yearFilter.innerHTML = "<option value=\"all\">All years</option>";
+    // Mantem o texto do HTML como principal para evitar mudanca visual.
+    const defaultAllOption = yearFilter.querySelector("option[value=\"all\"]");
+    const allLabel = defaultAllOption ? defaultAllOption.textContent : "All years";
+    yearFilter.innerHTML = "";
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.textContent = allLabel;
+    yearFilter.appendChild(allOption);
     years.forEach(year => {
         const option = document.createElement("option");
         option.value = String(year);
@@ -189,8 +232,8 @@ function aplicarFiltros(trigger) {
         return matchShow && matchPerson && matchYear;
     });
 
-    detailsTitle.text("Overview");
-    detailsSubtitle.text("Hover over a column or point to see details.");
+    detailsTitle.text(DEFAULT_DETAILS_TITLE);
+    detailsSubtitle.text(DEFAULT_DETAILS_SUBTITLE);
     detailsList.html("");
     
     // Limpa qualquer visualização anterior (SVG e ForeignObjects)
@@ -356,7 +399,7 @@ function desenharBarras(details) {
         .on("click", () => {
             if (pinnedKey !== null) {
                 pinnedKey = null;
-                detailsTitle.text("Overview"); detailsSubtitle.text("Hover over a column to see details or click to pin."); detailsList.html(""); updateHighlight(null);
+                detailsTitle.text(DEFAULT_DETAILS_TITLE); detailsSubtitle.text(DEFAULT_DETAILS_SUBTITLE); detailsList.html(""); updateHighlight(null);
             }
         });
 
@@ -410,12 +453,12 @@ function desenharBarras(details) {
     svg.selectAll("rect.year-overlay").data(dataByYear).enter().append("rect").attr("class", "year-overlay")
         .attr("x", d => x(d.key)).attr("y", 0).attr("width", x.bandwidth()).attr("height", height).attr("opacity", 0)
         .on("mouseover", (_, d) => { if (pinnedKey === null) { renderizarCardsLaterais(d.key, false, detailsByKey); updateHighlight(d.key); } })
-        .on("mouseout", () => { if (pinnedKey === null) { detailsTitle.text("Overview"); detailsSubtitle.text("Hover over a column to see details or click to pin."); detailsList.html(""); updateHighlight(null); } })
+        .on("mouseout", () => { if (pinnedKey === null) { detailsTitle.text(DEFAULT_DETAILS_TITLE); detailsSubtitle.text(DEFAULT_DETAILS_SUBTITLE); detailsList.html(""); updateHighlight(null); } })
         .on("click", (event, d) => {
             event.stopPropagation(); 
             pinnedKey = pinnedKey === d.key ? null : d.key;
             if (pinnedKey === null) {
-                detailsTitle.text("Overview"); detailsSubtitle.text("Hover over a column to see details or click to pin."); detailsList.html(""); updateHighlight(null);
+                detailsTitle.text(DEFAULT_DETAILS_TITLE); detailsSubtitle.text(DEFAULT_DETAILS_SUBTITLE); detailsList.html(""); updateHighlight(null);
             } else {
                 renderizarCardsLaterais(pinnedKey, true, detailsByKey); updateHighlight(pinnedKey);
             }

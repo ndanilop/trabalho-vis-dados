@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,21 +26,52 @@
             </div>
 
             <div class="controls">
-                <label for="year-filter">Filtrar por ano</label>
+                <label for="search-person">Search by person</label>
+                <input id="search-person" list="people-list" type="text" placeholder="Type a name" />
+                <datalist id="people-list"></datalist>
+
+                <label for="search-show">Search by show</label>
+                <input id="search-show" list="shows-list" type="text" placeholder="Type a show" />
+                <datalist id="shows-list"></datalist>
+
+                <label for="year-filter">Filter by year</label>
                 <select id="year-filter">
-                    <option value="all">Todos os anos</option>
+                    <option value="all">All years</option>
+                </select>
+
+                <label for="view-mode">View mode</label>
+                <select id="view-mode">
+                    <option value="split">Side by side</option>
+                    <option value="solo">Chart only</option>
                 </select>
             </div>
 
             <div class="details-panel">
-                <h3 id="details-title">Passe o mouse em um ano para ver detalhes</h3>
-                <p id="details-subtitle">Clique para fixar a seleção.</p>
+                <h3 id="details-title">Overview</h3>
+                <p id="details-subtitle">Hover over a column or point to see details.</p>
                 <div id="details-list"></div>
             </div>
         </aside>
 
         <main class="chart-wrapper">
-            <div id="chart"></div>
+            <div class="chart-split">
+                <div class="chart-panel">
+                    <div id="chart"></div>
+                </div>
+                <div class="iframe-panel">
+                    <div class="embed-placeholder">
+                        <img
+                            src="/static/broadway-timeline-placeholder.png"
+                            alt="Reference timeline placeholder"
+                        />
+                        <div class="embed-actions">
+                            <a href="https://maestramusic.org/resources/timelines/timeline-of-broadway-conductors-and-mds/" target="_blank" rel="noreferrer">
+                                Open reference in new tab
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
